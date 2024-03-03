@@ -19,8 +19,8 @@ exports.signUp = async (req, res, next) => {
 
   try {
     const newAdmin = await createAdmin(req);
-    const savedAdmin = await newAdmin.save(); 
-    return res.status(200).send({ message: "User created successfully!", user: savedAdmin  });
+    const savedAdmin = await newAdmin.save();
+    return res.status(200).send({ message: "User created successfully!", user: savedAdmin });
   } catch (error) {
     return res.status(400).send(error);
   }
@@ -32,7 +32,7 @@ exports.logIn = async (req, res) => {
   if (error) return res.status(400).send(error.details[0].message);
 
   const foundAdmin = await Admin.findOne({ email: req.body.email }); //returns the first document that matches the query criteria or null
-  if (!foundAdmin) return res.status(400).send({ message: "Email is not found" });
+  if (!foundAdmin) return res.status(404).send({ message: "Email is not found" });
 
   try {
     const isMatch = await bcrypt.compareSync(req.body.password, foundAdmin.password);
@@ -40,7 +40,7 @@ exports.logIn = async (req, res) => {
 
     // create and assign jwt
     const token = await jwt.sign({ _id: foundAdmin._id }, MASTER_KEY);
-    
+
     return res.status(200).header("admin-token", token).send({ "admin-token": token });
   } catch (error) {
     return res.status(400).send(error);
@@ -56,7 +56,7 @@ exports.updateAdmin = async (req, res) => {
     if (!updatedAdmin) {
       return res.status(400).send({ message: "Could not update user" });
     }
-    return res.status(200).send({ message: "User updated successfully", updatedUser});
+    return res.status(200).send({ message: "User updated successfully", updatedUser });
 
   } catch (error) {
     return res.status(400).send({ error: "An error has occurred, unable to update user" });
@@ -66,12 +66,12 @@ exports.updateAdmin = async (req, res) => {
 // Delete user
 exports.deleteAdmin = async (req, res) => {
   try {
-    const deletedAdmin = await Admin.findByIdAndDelete({ _id: req.params.userId}); // the `await` is very important here!
+    const deletedAdmin = await Admin.findByIdAndDelete({ _id: req.params.userId }); // the `await` is very important here!
 
     if (!deletedAdmin) {
       return res.status(400).send({ message: "Could not delete user" });
     }
-    return res.status(200).send({ message: "User deleted successfully", user: deletedAdmin});
+    return res.status(200).send({ message: "User deleted successfully", user: deletedAdmin });
   } catch (error) {
     return res.status(400).send({ error: "An error has occurred, unable to delete user" });
   }
